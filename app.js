@@ -22,6 +22,7 @@ class HashMap{
     console.log('The current loadRatio is: ', loadRatio);
     if(loadRatio > HashMap.MAX_LOAD_RATIO){
       console.log('gotta resize');
+      this._resize(this._capacity * HashMap.SIZE_RATIO);
     }
     const index = this._findSlot(key);
     console.log('Found slot at:', index);
@@ -34,7 +35,16 @@ class HashMap{
   }
 
   remove(key){
+    const index = this._findSlot(key);
+    const slot = this._slots[index];
 
+    if(slot === undefined){
+      throw new Error('Key error');
+    }
+
+    slot.deleted = true;
+    this.length--;
+    this._deleted++;
   }
 
   _findSlot(key){
@@ -59,7 +69,17 @@ class HashMap{
   }
 
   _resize(size){
+    const oldSlots = this._slots;
+    this._capacity = size;
+    this.length = 0;
+    this.deleted = 0;
+    this._slots = [];
 
+    for(const slot of oldSlots){
+      if( slot !== undefined && !slot.deleted){
+        this.set(slot.key, slot.value);
+      }
+    }
   }
 
   static _hashString(string){
@@ -78,4 +98,7 @@ HashMap.SIZE_RATIO = 3;
 const testHash = new HashMap;
 
 testHash.set('cat', 'Black Cat');
+testHash.set('dog', 'real dog');
+testHash.set('person', 'William');
 console.log(testHash.get('cat'));
+console.log(testHash.get('person'));
